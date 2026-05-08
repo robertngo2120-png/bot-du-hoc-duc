@@ -9,15 +9,6 @@ function field(label, value) {
 }
 
 async function notifyTelegram(lead) {
-  const currentYear = new Date().getFullYear();
-  const ageInfo = lead.birthYear && lead.birthYear !== 'Chưa xác định'
-    ? `${lead.birthYear} (${currentYear - Number(lead.birthYear)} tuổi)`
-    : 'Chưa rõ';
-
-  const eligible = lead.age && lead.age !== 'Chưa xác định'
-    ? (Number(lead.age) >= 18 && Number(lead.age) <= 30 ? '✅ Đủ điều kiện' : '⚠️ Cần xem lại')
-    : '';
-
   const msg =
     `🔔 LEAD MỚI — MESSENGER\n` +
     `━━━━━━━━━━━━━━━━\n` +
@@ -25,7 +16,7 @@ async function notifyTelegram(lead) {
     `${field('Tên', lead.name)}\n` +
     `${field('Tỉnh/TP', lead.location)}\n` +
     `${field('Đối tượng', lead.relationship)}\n` +
-    `${field('Năm sinh', ageInfo)} ${eligible}\n` +
+    `${field('Năm sinh', lead.birthYear)}\n` +
     `${field('Quan tâm', lead.interest)}\n` +
     `${field('Trình độ', lead.level)}\n` +
     `${field('Timeline', lead.timeline)}\n` +

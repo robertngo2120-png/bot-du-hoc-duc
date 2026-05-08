@@ -12,7 +12,7 @@ async function saveLead(lead) {
 
   await sheets.spreadsheets.values.append({
     spreadsheetId: process.env.GOOGLE_SHEET_ID,
-    range: 'Lead Messenger!A:M',
+    range: 'Lead Messenger!A:L',
     valueInputOption: 'USER_ENTERED',
     requestBody: {
       values: [[
@@ -22,7 +22,6 @@ async function saveLead(lead) {
         lead.location,
         lead.relationship,
         lead.birthYear,
-        lead.age,
         lead.interest,
         lead.level,
         lead.timeline,
