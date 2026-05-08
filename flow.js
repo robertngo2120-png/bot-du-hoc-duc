@@ -6,32 +6,38 @@ const { notifyTelegram } = require('./notify');
 const { getSession, saveSession, cleanOldSessions } = require('./sessions');
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-const primaryModel = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
-const fallbackModel = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+
+const MODEL_CHAIN = [
+  'gemini-2.5-flash',
+  'gemini-2.0-flash',
+  'gemini-2.5-flash-lite',
+  'gemini-2.0-flash-lite',
+  'gemini-flash-latest',
+];
+
+const models = MODEL_CHAIN.map(m => ({
+  name: m,
+  instance: genAI.getGenerativeModel({ model: m })
+}));
 
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 
 async function generateContent(prompt) {
-  const attempts = [
-    { model: primaryModel, name: 'gemini-2.5-flash' },
-    { model: fallbackModel, name: 'gemini-1.5-flash' },
-    { model: fallbackModel, name: 'gemini-1.5-flash (retry)' },
-  ];
-
-  for (let i = 0; i < attempts.length; i++) {
-    const { model, name } = attempts[i];
+  for (let i = 0; i < models.length; i++) {
+    const { name, instance } = models[i];
     try {
-      if (i > 0) await sleep(1500);
-      const result = await model.generateContent(prompt);
-      if (i > 0) console.log(`Success with ${name}`);
+      if (i > 0) await sleep(1000);
+      const result = await instance.generateContent(prompt);
+      if (i > 0) console.log(`Fallback success: ${name}`);
       return (await result.response).text();
     } catch (err) {
-      const is503 = err.message?.includes('503') ||
+      const isOverload = err.message?.includes('503') ||
         err.message?.includes('overloaded') ||
         err.message?.includes('high demand') ||
-        err.message?.includes('unavailable');
-      console.log(`${name} failed: ${err.message?.slice(0, 80)}`);
-      if (!is503 || i === attempts.length - 1) throw err;
+        err.message?.includes('unavailable') ||
+        err.message?.includes('429');
+      console.log(`[${name}] failed: ${err.message?.slice(0, 60)}`);
+      if (!isOverload || i === models.length - 1) throw err;
     }
   }
 }
