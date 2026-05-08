@@ -12,13 +12,14 @@ async function saveLead(session) {
 
   await sheets.spreadsheets.values.append({
     spreadsheetId: process.env.GOOGLE_SHEET_ID,
-    range: 'Lead Messenger!A:H',
+    range: 'Lead Messenger!A:I',
     valueInputOption: 'USER_ENTERED',
     requestBody: {
       values: [[
         session.timestamp,
         session.name,
         session.phone,
+        session.location,
         session.interest,
         session.level,
         session.timeline,

@@ -14,6 +14,7 @@ async function notifyTelegram(lead) {
     `━━━━━━━━━━━━━━━━\n` +
     `📱 SĐT: ${lead.phone}\n` +
     `${field('Tên', lead.name)}\n` +
+    `${field('Tỉnh/TP', lead.location)}\n` +
     `${field('Quan tâm', lead.interest)}\n` +
     `${field('Trình độ', lead.level)}\n` +
     `${field('Timeline', lead.timeline)}\n` +

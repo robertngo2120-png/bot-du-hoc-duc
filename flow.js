@@ -58,9 +58,10 @@ GIAI ĐOẠN 1 — LẮNG NGHE & TRẢ LỜI (2-3 tin nhắn đầu):
 
 GIAI ĐOẠN 2 — TẠO KẾT NỐI (3-5 tin nhắn):
 - Hỏi thêm về hoàn cảnh của khách một cách TỰ NHIÊN (không phải hỏi form)
-- Ví dụ: "Bạn đang học hay đi làm rồi?" thay vì "Trình độ của bạn là gì?"
+- Ví dụ: "Cháu đang học hay đi làm rồi ạ?" thay vì "Trình độ của bạn là gì?"
 - Dần dần hiểu khách: độ tuổi, tình trạng, mong muốn
 - Chia sẻ thêm thông tin phù hợp với hoàn cảnh của họ
+- QUAN TRỌNG: Trong quá trình trò chuyện, hãy tự nhiên hỏi anh/chị và cháu đang ở tỉnh/thành phố nào. Lý do: Trung tâm đào tạo của ICOEuro có 2 cơ sở tại TP. Hồ Chí Minh — thông tin này giúp chuyên viên tư vấn lịch học phù hợp hơn.
 
 GIAI ĐOẠN 3 — XIN SĐT (khi đã tạo đủ tin tưởng):
 - Chỉ xin SĐT khi khách đã hỏi ít nhất 2-3 lượt và có vẻ quan tâm thật sự
@@ -143,7 +144,8 @@ async function extractLeadInfo(history) {
   "name": "tên khách hoặc null",
   "interest": "hướng quan tâm (Ausbildung/Đại học/Tiếng Đức) hoặc null",
   "level": "trình độ học vấn hoặc null",
-  "timeline": "thời gian dự định hoặc null"
+  "timeline": "thời gian dự định hoặc null",
+  "location": "tỉnh/thành phố khách đang ở hoặc null"
 }
 Chỉ trả về JSON, không giải thích thêm.
 
@@ -275,6 +277,7 @@ async function processMessage(event) {
       interest: info.interest || 'Chưa xác định',
       level: info.level || 'Chưa xác định',
       timeline: info.timeline || 'Chưa xác định',
+      location: info.location || 'Chưa xác định',
       fbName,
       fbId: senderId,
       timestamp: new Date().toLocaleString('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh' })
