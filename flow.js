@@ -9,17 +9,30 @@ const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 const primaryModel = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
 const fallbackModel = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
 
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+
 async function generateContent(prompt) {
-  try {
-    const result = await primaryModel.generateContent(prompt);
-    return (await result.response).text();
-  } catch (err) {
-    if (err.message?.includes('503') || err.message?.includes('overloaded') || err.message?.includes('high demand')) {
-      console.log('Primary model overloaded, switching to fallback...');
-      const result = await fallbackModel.generateContent(prompt);
+  const attempts = [
+    { model: primaryModel, name: 'gemini-2.5-flash' },
+    { model: fallbackModel, name: 'gemini-1.5-flash' },
+    { model: fallbackModel, name: 'gemini-1.5-flash (retry)' },
+  ];
+
+  for (let i = 0; i < attempts.length; i++) {
+    const { model, name } = attempts[i];
+    try {
+      if (i > 0) await sleep(1500);
+      const result = await model.generateContent(prompt);
+      if (i > 0) console.log(`Success with ${name}`);
       return (await result.response).text();
+    } catch (err) {
+      const is503 = err.message?.includes('503') ||
+        err.message?.includes('overloaded') ||
+        err.message?.includes('high demand') ||
+        err.message?.includes('unavailable');
+      console.log(`${name} failed: ${err.message?.slice(0, 80)}`);
+      if (!is503 || i === attempts.length - 1) throw err;
     }
-    throw err;
   }
 }
 
