@@ -106,9 +106,22 @@ async function handleMessage(event) {
       session.step = 'interest';
       break;
 
-    case 'interest':
+    case 'interest': {
+      const textLower = userText.toLowerCase();
+      let detectedInterest = null;
+
       if (INTERESTS[userText]) {
-        session.interest = INTERESTS[userText];
+        detectedInterest = INTERESTS[userText];
+      } else if (textLower.includes('ausbildung') || textLower.includes('nghề') || textLower.includes('du học nghề')) {
+        detectedInterest = INTERESTS['INTEREST_AUSBILDUNG'];
+      } else if (textLower.includes('đại học') || textLower.includes('university') || textLower.includes('du học')) {
+        detectedInterest = INTERESTS['INTEREST_UNIVERSITY'];
+      } else if (textLower.includes('tiếng') || textLower.includes('language') || textLower.includes('học tiếng')) {
+        detectedInterest = INTERESTS['INTEREST_LANGUAGE'];
+      }
+
+      if (detectedInterest) {
+        session.interest = detectedInterest;
         await sendText(senderId, `Bạn cho mình biết tên của bạn là gì nhé? 😊`);
         session.step = 'name';
       } else {
@@ -125,6 +138,7 @@ async function handleMessage(event) {
         );
       }
       break;
+    }
 
     case 'name':
       if (userText.length >= 2 && !INTERESTS[userText]) {
@@ -154,8 +168,8 @@ async function handleMessage(event) {
       break;
 
     case 'phone': {
-      const cleaned = userText.replace(/\s|-/g, '');
-      const isPhone = /^(\+84|0)[0-9]{8,10}$/.test(cleaned);
+      const cleaned = userText.replace(/[\s\-\.]/g, '');
+      const isPhone = /^(\+84|0)[0-9]{8,11}$/.test(cleaned);
 
       if (isPhone) {
         session.phone = cleaned;
