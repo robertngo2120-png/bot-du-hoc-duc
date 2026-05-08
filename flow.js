@@ -260,14 +260,17 @@ async function handleMessage(event) {
         await saveLead(session);
         await notifyTelegram(session);
 
-        // Gemini tạo câu cảm ơn tự nhiên
         const thanks = await askGemini('', session,
           `Khách vừa để lại số điện thoại. Viết 1 tin nhắn cảm ơn ngắn gọn, ấm áp. Cho khách biết chuyên gia sẽ liên hệ sớm. Khuyến khích khách hỏi thêm nếu cần. Tối đa 3 câu.`
         );
         await sendText(senderId, thanks);
         session.step = 'done';
       } else {
-        await sendText(senderId, 'Hình như số điện thoại chưa đúng rồi bạn ơi, bạn kiểm tra lại giúp mình nhé 😊');
+        // Khách đang hỏi thêm thay vì để SĐT — Gemini trả lời rồi nhắc lại
+        const reply = await askGemini(userText, session,
+          `Khách chưa để lại số điện thoại mà đang hỏi thêm hoặc chia sẻ thêm thông tin. Hãy trả lời câu hỏi/nội dung đó một cách tự nhiên, thân thiện. Sau đó nhẹ nhàng dẫn dắt lại để khách để lại số điện thoại — nhưng không được gượng ép, phải thật tự nhiên.`
+        );
+        await sendText(senderId, reply);
       }
       break;
     }
