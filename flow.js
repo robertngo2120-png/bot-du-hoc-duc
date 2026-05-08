@@ -49,6 +49,13 @@ Giai đoạn 5: Đi làm chính thức 3.000 EUR/tháng, định cư và nhập 
 VỀ CHI PHÍ: KHÔNG đề cập chi phí cụ thể của công ty — chuyên gia sale sẽ tư vấn trực tiếp. Chỉ nhấn mạnh học tại Đức miễn phí 100% + có lương.
 VỀ TIẾNG ĐỨC: Nếu khách chưa có B1 → giới thiệu SƠ BỘ rằng công ty có lộ trình đào tạo tiếng từ đầu, KHÔNG đi sâu chi tiết.
 PHONG CÁCH: Thân thiện tự nhiên như người bạn, ngắn gọn, súc tích, tạo cảm giác tin tưởng, dùng tiếng Việt tự nhiên, emoji nhẹ nhàng.
+
+== XỬ LÝ ĐẦU VÀO CỦA KHÁCH ==
+- Khách thường nhắn KHÔNG DẤU hoặc SAI CHÍNH TẢ — bạn phải TỰ HIỂU ý nghĩa, KHÔNG bao giờ nhận xét hay sửa lỗi chính tả của khách
+- Ví dụ: "du hoc nghe" = "du học nghề", "tieng duc" = "tiếng Đức", "dieu duong" = "điều dưỡng", "con toi" = "con tôi"
+- Khách có thể là phụ huynh hỏi cho con — hãy điều chỉnh xưng hô phù hợp (anh/chị thay vì bạn)
+- Nếu không hiểu ý khách → hỏi lại nhẹ nhàng, KHÔNG nói "tôi không hiểu" hay "bạn viết sai"
+- Luôn giữ thái độ kiên nhẫn, ấm áp dù khách hỏi đi hỏi lại
 `;
 
 function getSession(senderId) {
@@ -181,11 +188,23 @@ async function handleMessage(event) {
 
       if (INTERESTS[userText]) {
         detectedInterest = INTERESTS[userText];
-      } else if (textLower.includes('ausbildung') || textLower.includes('nghề')) {
+      } else if (
+        textLower.includes('ausbildung') ||
+        textLower.includes('nghề') || textLower.includes('nghe') ||
+        textLower.includes('du hoc nghe') || textLower.includes('hoc nghe') ||
+        textLower.includes('ngành nghề') || textLower.includes('nganh nghe')
+      ) {
         detectedInterest = INTERESTS['INTEREST_AUSBILDUNG'];
-      } else if (textLower.includes('đại học') || textLower.includes('university')) {
+      } else if (
+        textLower.includes('đại học') || textLower.includes('dai hoc') ||
+        textLower.includes('university') || textLower.includes('đh')
+      ) {
         detectedInterest = INTERESTS['INTEREST_UNIVERSITY'];
-      } else if (textLower.includes('tiếng') || textLower.includes('ngôn ngữ')) {
+      } else if (
+        textLower.includes('tiếng') || textLower.includes('tieng') ||
+        textLower.includes('ngôn ngữ') || textLower.includes('ngon ngu') ||
+        textLower.includes('language') || textLower.includes('hoc tieng')
+      ) {
         detectedInterest = INTERESTS['INTEREST_LANGUAGE'];
       }
 
