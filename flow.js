@@ -6,7 +6,22 @@ const { notifyTelegram } = require('./notify');
 const { getSession, saveSession, cleanOldSessions } = require('./sessions');
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
+const primaryModel = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
+const fallbackModel = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+
+async function generateContent(prompt) {
+  try {
+    const result = await primaryModel.generateContent(prompt);
+    return (await result.response).text();
+  } catch (err) {
+    if (err.message?.includes('503') || err.message?.includes('overloaded') || err.message?.includes('high demand')) {
+      console.log('Primary model overloaded, switching to fallback...');
+      const result = await fallbackModel.generateContent(prompt);
+      return (await result.response).text();
+    }
+    throw err;
+  }
+}
 
 const PAGE_ACCESS_TOKEN = process.env.FB_PAGE_ACCESS_TOKEN;
 const queues = new Map();
@@ -213,8 +228,7 @@ Hội thoại:
 ${conversation}`;
 
   try {
-    const result = await model.generateContent(prompt);
-    const raw = (await result.response).text().trim();
+    const raw = (await generateContent(prompt)).trim();
     const json = raw.replace(/```json|```/g, '').trim();
     return JSON.parse(json);
   } catch {
@@ -270,8 +284,7 @@ Tin nhắn mới nhất của khách: "${userMessage}"
 Hãy trả lời tự nhiên, phù hợp với giai đoạn của cuộc trò chuyện.`;
 
   try {
-    const result = await model.generateContent(prompt);
-    const reply = stripMarkdown((await result.response).text());
+    const reply = stripMarkdown(await generateContent(prompt));
     session.history.push({ role: 'bot', text: reply });
     return reply;
   } catch (err) {
