@@ -8,7 +8,10 @@ const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
 
 const PAGE_ACCESS_TOKEN = process.env.FB_PAGE_ACCESS_TOKEN;
-const sessions = new Map();
+const { getSession, saveSession } = require('./sessions');
+
+// Queue xử lý tin nhắn theo thứ tự từng user
+const queues = new Map();
 
 const SYSTEM_PROMPT = `
 Bạn là trợ lý tư vấn của ICOEuro — đơn vị tư vấn du học nghề Đức (Ausbildung) uy tín tại Việt Nam.
@@ -80,16 +83,12 @@ GIAI ĐOẠN 3 — XIN SĐT (khi đã tạo đủ tin tưởng):
 - Tiếng Việt tự nhiên, không cứng nhắc, không sáo rỗng
 `;
 
-function getSession(senderId) {
-  if (!sessions.has(senderId)) {
-    sessions.set(senderId, {
-      step: 'chatting',
-      turns: 0,
-      history: [],
-      collectedInfo: {}
-    });
+function enqueue(senderId, fn) {
+  if (!queues.has(senderId)) {
+    queues.set(senderId, Promise.resolve());
   }
-  return sessions.get(senderId);
+  const next = queues.get(senderId).then(fn).catch(err => console.error('Queue error:', err));
+  queues.set(senderId, next);
 }
 
 async function sendText(recipientId, text) {
@@ -188,7 +187,7 @@ Hãy trả lời tự nhiên, phù hợp với giai đoạn của cuộc trò ch
   return reply;
 }
 
-async function handleMessage(event) {
+async function processMessage(event) {
   const senderId = event.sender.id;
   const session = getSession(senderId);
 
@@ -265,6 +264,13 @@ async function handleMessage(event) {
     const reply = await chat(session, userText);
     await sendText(senderId, reply);
   }
+
+  saveSession(senderId, session);
+}
+
+async function handleMessage(event) {
+  const senderId = event.sender.id;
+  enqueue(senderId, () => processMessage(event));
 }
 
 module.exports = { handleMessage };
