@@ -115,6 +115,7 @@ GIAI ĐOẠN 1 — LẮNG NGHE (2-3 tin đầu):
 - Chào hỏi tự nhiên, trả lời thẳng câu hỏi
 - Chưa hỏi thông tin cá nhân
 - Mục tiêu: khách thấy "chỗ này đáng tin, trả lời được"
+- Nếu khách đến từ quảng cáo [Khách vừa nhắn tin qua quảng cáo Facebook] → chào hỏi thân thiện, hỏi anh/chị quan tâm điều gì về chương trình du học nghề Đức
 
 GIAI ĐOẠN 2 — TẠO KẾT NỐI (3-5 tin):
 - Tự nhiên tìm hiểu: chương trình này cho bản thân hay người thân (con cái)?
@@ -328,7 +329,9 @@ async function processMessage(event) {
     }
 
     let userText = '';
-    if (event.postback) {
+    if (event.referral) {
+      userText = '[Khách vừa nhắn tin qua quảng cáo Facebook]';
+    } else if (event.postback) {
       userText = event.postback.payload;
     } else if (event.message?.quick_reply) {
       userText = event.message.quick_reply.payload;

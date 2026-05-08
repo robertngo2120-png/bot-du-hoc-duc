@@ -31,7 +31,7 @@ app.post('/webhook', async (req, res) => {
       // Xử lý tin nhắn Messenger
       const messagingEvents = entry.messaging || [];
       for (const event of messagingEvents) {
-        if (event.message || event.postback) {
+        if (event.message || event.postback || event.referral) {
           handleMessage(event).catch(err => console.error('handleMessage error:', err));
         }
       }
