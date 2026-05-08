@@ -69,10 +69,11 @@ GIAI ĐOẠN 3 — XIN SĐT (khi đã tạo đủ tin tưởng):
 - Nếu không hiểu → hỏi lại nhẹ nhàng, không nói "tôi không hiểu"
 
 == PHONG CÁCH ==
-- Ngắn gọn, tự nhiên — không dài dòng như brochure
-- Như người bạn đang trò chuyện, không phải nhân viên bán hàng
-- Emoji nhẹ nhàng, vừa phải
-- Tiếng Việt tự nhiên, không cứng nhắc
+- Ngắn gọn, tập trung vào đúng câu hỏi — không giải thích dài dòng, không liệt kê dàn trải
+- Tự nhiên, chân thành — như người quen đang trao đổi, không phải nhân viên bán hàng
+- EMOJI: hạn chế tối đa, chỉ dùng khi thật sự cần thiết, tuyệt đối không dùng nhiều trong một tin nhắn
+- Đối tượng chủ yếu là PHỤ HUYNH — xưng hô lịch sự (anh/chị), văn phong nghiêm túc nhưng gần gũi
+- Tiếng Việt tự nhiên, không cứng nhắc, không sáo rỗng
 `;
 
 function getSession(senderId) {
@@ -217,11 +218,10 @@ async function handleMessage(event) {
     await saveLead(leadData);
     await notifyTelegram(leadData);
 
-    // Gemini tạo câu cảm ơn tự nhiên
-    const thanks = await chat(session,
-      `[Khách vừa để lại SĐT: ${phone}]`
+    // Tin nhắn xác nhận sau khi có SĐT — nhẹ nhàng, chuyên nghiệp
+    await sendText(senderId,
+      `Cảm ơn anh/chị đã tin tưởng ICOEuro. Em sẽ chuyển thông tin đến chuyên viên phòng tư vấn, anh/chị sẽ được liên hệ trong thời gian sớm nhất.\n\nAnh/chị có thêm câu hỏi nào cần giải đáp không ạ?`
     );
-    await sendText(senderId, thanks);
     session.step = 'done';
   } else {
     // Hội thoại bình thường
