@@ -135,6 +135,45 @@ GIAI ĐOẠN 3 — XIN SĐT (khi đã đủ tin tưởng):
 - Tự nhiên, không xin xỏ — framing: có lợi cho khách
 - Ví dụ tốt: "Để chuyên viên ICOEuro tư vấn riêng và miễn phí cho trường hợp của anh/chị, anh/chị hay dùng số nào để tiện liên lạc ạ?"
 
+== CẢM XÚC & TÂM TRẠNG KHÁCH ==
+Đọc cách viết để nhận diện trạng thái cảm xúc và điều chỉnh tone phù hợp:
+
+LO LẮNG / DO DỰ (viết dè dặt, hỏi nhiều về rủi ro, dùng từ "lỡ", "sợ", "không biết có được không"):
+→ Ưu tiên trấn an trước, tư vấn sau. Giọng nhẹ nhàng, kiên nhẫn, không thúc ép.
+→ Ví dụ: "con tui hok giỏi lắm đâu", "lỡ không đậu visa thì sao"
+
+HỨNG THÚ / HĂNG HÁI (viết nhanh, nhiều dấu chấm than, hỏi về cơ hội, lương, tương lai):
+→ Match năng lượng, chia sẻ thêm điểm hấp dẫn, đẩy nhanh đến xin SĐT.
+→ Ví dụ: "lương 1400 euro thật không", "nghe hay quá", "con tôi muốn đi ngay"
+
+HOÀI NGHI / THẬN TRỌNG (hỏi bằng chứng, so sánh, đặt câu hỏi ngược):
+→ Trả lời thực tế, có số liệu cụ thể, đề nghị tìm hiểu thêm về ICO Group.
+→ Ví dụ: "chỗ nào cũng nói vậy", "có đảm bảo không", "thật sự được như vậy không"
+
+THỰC DỤNG / BẬN RỘN (tin nhắn ngắn, thẳng vào vấn đề, ít cảm xúc):
+→ Trả lời súc tích, không dài dòng, tôn trọng thời gian của họ.
+
+== NHẬN DIỆN TÍN HIỆU CHỐT (Buying Signals) ==
+Khi thấy các tín hiệu sau → đây là lúc phù hợp để xin SĐT, đừng bỏ lỡ:
+
+TÍN HIỆU MẠNH (xin SĐT ngay lần này):
+- Hỏi về thủ tục cụ thể: "cần chuẩn bị hồ sơ gì", "đăng ký như thế nào"
+- Hỏi về timeline: "bao giờ có thể đi", "kỳ tới mấy tháng"
+- Xác nhận đủ điều kiện: "con tôi đủ tuổi chưa", "học lực như vậy có được không"
+- Hỏi về đặt lịch: "tôi có thể gặp tư vấn viên không", "liên hệ ở đâu"
+- So sánh để quyết định: "khác gì chỗ khác", "tại sao chọn ICOEuro"
+
+TÍN HIỆU VỪA (dẫn dắt thêm 1-2 tin rồi xin SĐT):
+- Hỏi ngành cụ thể: "điều dưỡng thì ra sao", "học cơ khí ở đức được không"
+- Chia sẻ thông tin con: năm sinh, trình độ, ngành học hiện tại
+- Hỏi về chi phí (dù mình không trả lời trực tiếp)
+
+== KHÁCH QUAY LẠI ==
+Nếu có lịch sử trò chuyện từ trước:
+- Nhắc nhẹ những gì đã trao đổi: "Lần trước mình có nói về ngành Điều dưỡng..."
+- Không hỏi lại thông tin đã biết
+- Thể hiện bạn nhớ họ → tạo cảm giác được quan tâm cá nhân
+
 == XỬ LÝ ĐẦU VÀO ==
 - Hiểu tiếng Việt KHÔNG DẤU và SAI CHÍNH TẢ — tự hiểu, không nhận xét
 - Phụ huynh hỏi cho con → xưng hô anh/chị, hỏi thông tin của con
@@ -293,38 +332,65 @@ async function chat(session, userMessage) {
     .map(h => `${h.role === 'user' ? 'Khách' : 'Bot'}: ${h.text}`)
     .join('\n');
 
-  const recentUserMessages = session.history
+  const allUserMessages = session.history
     .filter(h => h.role === 'user')
     .map(h => h.text.toLowerCase())
     .join(' ');
 
-  const interestSignals = [
-    'ngành', 'nganh', 'điều dưỡng', 'dieu duong', 'cơ khí', 'co khi',
-    'ô tô', 'o to', 'khách sạn', 'khach san', 'nhà hàng', 'nha hang',
-    'điện', 'dien', 'xây dựng', 'xay dung', 'cntt', 'it',
-    'lộ trình', 'lo trinh', 'điều kiện', 'dieu kien', 'visa',
-    'bao lâu', 'bao lau', 'khi nào', 'khi nao', 'năm nào', 'nam nao',
-    'b1', 'tiếng đức', 'tieng duc', 'lương', 'luong', 'euro',
-    'chi phí', 'chi phi', 'con tôi', 'con toi', 'muốn đi', 'muon di',
-    'sinh năm', 'sinh nam', 'tuổi', 'tuoi'
+  // Tín hiệu chốt mạnh
+  const strongBuySignals = [
+    'hồ sơ', 'ho so', 'đăng ký', 'dang ky', 'thủ tục', 'thu tuc',
+    'kỳ tới', 'ky toi', 'bao giờ đi', 'bao gio di', 'mấy tháng nữa',
+    'gặp tư vấn', 'gap tu van', 'đặt lịch', 'dat lich', 'liên hệ',
+    'tại sao chọn', 'khác gì', 'con đủ tuổi chưa', 'đủ điều kiện chưa'
   ];
 
-  const hasInterest = interestSignals.some(s => recentUserMessages.includes(s));
-  const enoughTurns = session.turns >= 3;
+  // Tín hiệu quan tâm vừa
+  const mediumBuySignals = [
+    'điều dưỡng', 'dieu duong', 'cơ khí', 'co khi', 'ô tô', 'o to',
+    'khách sạn', 'khach san', 'nhà hàng', 'nha hang', 'cntt', 'it',
+    'lộ trình', 'lo trinh', 'visa', 'b1', 'tiếng đức', 'tieng duc',
+    'lương', 'luong', 'euro', 'con tôi', 'con toi', 'sinh năm', 'sinh nam',
+    'năm sinh', 'tuổi', 'tuoi', 'chi phí', 'chi phi'
+  ];
 
-  const turnInstruction = (hasInterest && enoughTurns)
-    ? 'LƯU Ý: Khách đã thể hiện quan tâm thật sự. Nếu chưa xin SĐT, hãy tự nhiên dẫn dắt để xin — nhưng phải thật tự nhiên, không gượng ép.'
-    : session.turns >= 7
-    ? 'LƯU Ý: Cuộc trò chuyện đã khá dài. Nếu thấy thời điểm phù hợp, nhẹ nhàng đề xuất để chuyên viên liên hệ tư vấn.'
+  const hasStrongSignal = strongBuySignals.some(s => allUserMessages.includes(s));
+  const hasMediumSignal = mediumBuySignals.some(s => allUserMessages.includes(s));
+  const enoughTurns = session.turns >= 2;
+
+  // Nhận diện cảm xúc từ tin nhắn hiện tại
+  const currentMsg = userMessage.toLowerCase();
+  const isAnxious = ['lỡ', 'sợ', 'lo', 'không biết có', 'khong biet co', 'hok giỏi', 'học yếu'].some(k => currentMsg.includes(k));
+  const isExcited = ['hay quá', 'thật không', 'tuyệt', 'muốn đi ngay', 'ngon', 'oke'].some(k => currentMsg.includes(k));
+
+  // Context khách quay lại
+  const isReturning = session.turns === 1 && session.history.length > 2;
+  const returningContext = isReturning
+    ? `KHÁCH QUAY LẠI: Họ đã từng trò chuyện trước đó. Nhắc nhẹ những gì đã biết về họ để tạo cảm giác được nhớ đến.`
     : '';
+
+  const emotionHint = isAnxious
+    ? 'KHÁCH ĐANG LO LẮNG: Ưu tiên trấn an, nói nhẹ nhàng, không thúc ép.'
+    : isExcited
+    ? 'KHÁCH ĐANG HỨNG THÚ: Match năng lượng, chia sẻ thêm điểm hấp dẫn, đẩy nhanh đến xin SĐT.'
+    : '';
+
+  const closeInstruction = hasStrongSignal
+    ? 'TÍN HIỆU CHỐT MẠNH: Khách đang rất sẵn sàng. Xin SĐT tự nhiên trong tin nhắn này.'
+    : (hasMediumSignal && enoughTurns)
+    ? 'TÍN HIỆU QUAN TÂM: Nếu thấy phù hợp, dẫn dắt nhẹ nhàng để xin SĐT.'
+    : session.turns >= 7
+    ? 'Cuộc trò chuyện đã dài. Tìm cơ hội phù hợp để đề nghị kết nối chuyên viên.'
+    : '';
+
+  const hints = [emotionHint, closeInstruction, returningContext].filter(Boolean).join('\n');
 
   const prompt = `${SYSTEM_PROMPT}
 ${conversationContext ? `\nLỊCH SỬ TRÒ CHUYỆN:\n${conversationContext}\n` : ''}
-${turnInstruction}
-
+${hints ? `\nHƯỚNG DẪN CHO TIN NÀY:\n${hints}\n` : ''}
 Tin nhắn mới nhất của khách: "${userMessage}"
 
-Hãy trả lời tự nhiên, phù hợp với giai đoạn của cuộc trò chuyện.`;
+Hãy trả lời tự nhiên, phù hợp với cảm xúc và giai đoạn của cuộc trò chuyện.`;
 
   try {
     const reply = stripMarkdown(await generateContent(prompt));
