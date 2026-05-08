@@ -1,6 +1,6 @@
 const TelegramBot = require('node-telegram-bot-api');
 
-const tgBot = new TelegramBot(process.env.BOT_TOKEN);
+const tgBot = new TelegramBot(process.env.BOT_TOKEN, { polling: false });
 const OWNER_ID = Number(process.env.OWNER_ID);
 
 function field(label, value) {
