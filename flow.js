@@ -38,7 +38,11 @@ LỘ TRÌNH:
 - Sau đó: Đi làm chính thức, định cư
 
 YÊU CẦU TIẾNG ĐỨC: Tối thiểu B1. Nếu chưa có → công ty có lộ trình học từ đầu (không đi sâu chi tiết).
-CHI PHÍ CÔNG TY: KHÔNG đề cập. Chỉ nhấn mạnh học tại Đức miễn phí + có lương.
+CHI PHÍ CÔNG TY: KHÔNG đề cập số tiền cụ thể. Nếu khách hỏi → trả lời: "Chi phí cụ thể tùy theo từng trường hợp, chuyên viên sẽ tư vấn chi tiết và miễn phí cho anh/chị ạ." Không lảng tránh quá 1 lần.
+CHƯƠNG TRÌNH KHÁC: Công ty có thêm chương trình 18B và du học Đại học, nhưng page này tập trung vào du học nghề. Nếu khách hỏi về các chương trình khác → ghi nhận và cho biết chuyên viên sẽ tư vấn phù hợp.
+
+== GIỚI HẠN THÔNG TIN ==
+QUAN TRỌNG: Chỉ nói những gì có trong tài liệu trên. Nếu câu hỏi vượt ngoài phạm vi hiểu biết → KHÔNG tự bịa, KHÔNG đoán mò. Thay vào đó nói: "Câu hỏi này cần chuyên viên tư vấn trực tiếp mới chính xác được ạ" rồi đề nghị để lại SĐT.
 
 == CHIẾN LƯỢC TƯ VẤN ==
 NGUYÊN TẮC CỐT LÕI: Đừng bán hàng ngay từ đầu. Hãy là người bạn đáng tin, lắng nghe và giải đáp thật sự trước.
@@ -113,6 +117,17 @@ function extractPhone(text) {
   return match ? match[0] : null;
 }
 
+function isGoodbye(text) {
+  const t = text.toLowerCase();
+  const keywords = [
+    'thôi', 'không cần', 'khong can', 'bận rồi', 'ban roi',
+    'hẹn sau', 'hen sau', 'tạm biệt', 'tam biet', 'bye', 'ok rồi',
+    'không quan tâm', 'khong quan tam', 'không có nhu cầu',
+    'thôi khỏi', 'thoi khoi', 'dừng lại', 'dung lai'
+  ];
+  return keywords.some(k => t.includes(k));
+}
+
 // Gemini trích xuất thông tin lead từ lịch sử hội thoại
 async function extractLeadInfo(history) {
   const conversation = history.map(h => `${h.role === 'user' ? 'Khách' : 'Bot'}: ${h.text}`).join('\n');
@@ -177,6 +192,14 @@ async function handleMessage(event) {
   const senderId = event.sender.id;
   const session = getSession(senderId);
 
+  // Xử lý tin nhắn không phải text (ảnh, voice, sticker, file...)
+  if (event.message && !event.message.text && !event.message.quick_reply) {
+    await sendText(senderId,
+      'Dạ hiện tại em chỉ hỗ trợ qua tin nhắn văn bản. Anh/chị có thể nhắn nội dung cần tư vấn, em sẽ hỗ trợ ngay ạ.'
+    );
+    return;
+  }
+
   let userText = '';
   if (event.postback) {
     userText = event.postback.payload;
@@ -186,6 +209,20 @@ async function handleMessage(event) {
     userText = event.message.text.trim();
   } else {
     return;
+  }
+
+  // Xử lý khách muốn dừng
+  if (isGoodbye(userText) && session.step !== 'done') {
+    await sendText(senderId,
+      'Dạ anh/chị cứ thoải mái. Khi nào cần tư vấn thêm thì nhắn em, bên ICOEuro luôn sẵn sàng hỗ trợ ạ.'
+    );
+    session.step = 'paused';
+    return;
+  }
+
+  // Nếu trước đó khách dừng mà giờ nhắn lại → tiếp tục bình thường
+  if (session.step === 'paused') {
+    session.step = 'chatting';
   }
 
   if (session.step === 'done') {
