@@ -307,10 +307,8 @@ Hãy trả lời tự nhiên, phù hợp với giai đoạn của cuộc trò ch
     session.history.push({ role: 'bot', text: reply });
     return reply;
   } catch (err) {
-    console.error('Gemini error:', err.message);
-    const fallback = 'Dạ hệ thống đang bận, anh/chị vui lòng nhắn lại sau ít phút nhé.';
-    session.history.push({ role: 'bot', text: fallback });
-    return fallback;
+    console.error('All models failed:', err.message);
+    return null;
   }
 }
 
@@ -357,7 +355,7 @@ async function processMessage(event) {
     // Sau khi có SĐT vẫn trả lời
     if (session.step === 'done') {
       const reply = await chat(session, userText);
-      await sendText(senderId, reply);
+      if (reply) await sendText(senderId, reply);
       return;
     }
 
@@ -397,7 +395,7 @@ async function processMessage(event) {
       session.step = 'done';
     } else {
       const reply = await chat(session, userText);
-      await sendText(senderId, reply);
+      if (reply) await sendText(senderId, reply);
     }
   } finally {
     // Luôn lưu session dù có lỗi hay không
