@@ -165,8 +165,30 @@ async function chat(session, userMessage) {
     .map(h => `${h.role === 'user' ? 'Khách' : 'Bot'}: ${h.text}`)
     .join('\n');
 
-  const turnInstruction = session.turns >= 4
-    ? `LƯU Ý: Đây là lượt thứ ${session.turns} của cuộc trò chuyện. Nếu khách đã thể hiện sự quan tâm rõ ràng, hãy tự nhiên dẫn dắt để xin số điện thoại trong tin nhắn này hoặc tin tiếp theo.`
+  // Phân tích dấu hiệu quan tâm thật sự từ lịch sử
+  const recentUserMessages = session.history
+    .filter(h => h.role === 'user')
+    .map(h => h.text.toLowerCase())
+    .join(' ');
+
+  const interestSignals = [
+    'ngành', 'nganh', 'điều dưỡng', 'dieu duong', 'cơ khí', 'co khi',
+    'ô tô', 'o to', 'khách sạn', 'khach san', 'nhà hàng', 'nha hang',
+    'điện', 'dien', 'xây dựng', 'xay dung', 'cntt', 'it',
+    'lộ trình', 'lo trinh', 'điều kiện', 'dieu kien', 'visa',
+    'bao lâu', 'bao lau', 'khi nào', 'khi nao', 'năm nào', 'nam nao',
+    'b1', 'tiếng đức', 'tieng duc', 'học phí', 'hoc phi',
+    'lương', 'luong', 'euro', 'chi phí', 'chi phi',
+    'con tôi', 'con toi', 'con mình', 'con minh', 'muốn đi', 'muon di'
+  ];
+
+  const hasInterest = interestSignals.some(s => recentUserMessages.includes(s));
+  const enoughTurns = session.turns >= 3;
+
+  const turnInstruction = (hasInterest && enoughTurns)
+    ? `LƯU Ý: Khách đã thể hiện quan tâm thật sự qua nội dung trò chuyện. Nếu chưa xin SĐT, hãy tự nhiên dẫn dắt để xin trong tin nhắn này — nhưng phải thật tự nhiên, không gượng ép.`
+    : session.turns >= 6
+    ? `LƯU Ý: Cuộc trò chuyện đã khá dài. Nếu thấy thời điểm phù hợp, có thể nhẹ nhàng đề xuất để chuyên viên liên hệ tư vấn trực tiếp.`
     : '';
 
   const prompt = `${SYSTEM_PROMPT}
