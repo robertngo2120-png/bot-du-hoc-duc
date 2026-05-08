@@ -192,7 +192,30 @@ async function sendText(recipientId, text) {
       { params: { access_token: PAGE_ACCESS_TOKEN } }
     );
   } catch (err) {
-    console.error('sendText error:', err?.response?.data || err.message);
+    const errData = err?.response?.data?.error;
+    console.error('sendText error:', errData || err.message);
+
+    // Cảnh báo Telegram khi token hết hạn
+    if (errData?.code === 190) {
+      alertTokenExpired();
+    }
+  }
+}
+
+let tokenAlertSent = false;
+async function alertTokenExpired() {
+  if (tokenAlertSent) return;
+  tokenAlertSent = true;
+  try {
+    const { notifyTelegram } = require('./notify');
+    const TelegramBot = require('node-telegram-bot-api');
+    const tgBot = new TelegramBot(process.env.BOT_TOKEN, { polling: false });
+    await tgBot.sendMessage(
+      Number(process.env.OWNER_ID),
+      '⚠️ CẢNH BÁO: Facebook Page Access Token đã hết hạn!\n\nBot đang không thể trả lời khách. Cần cập nhật token mới ngay!'
+    );
+  } catch (e) {
+    console.error('alertTokenExpired error:', e.message);
   }
 }
 
