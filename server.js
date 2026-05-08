@@ -1,6 +1,7 @@
 require('dotenv').config();
 const express = require('express');
 const { handleMessage } = require('./flow');
+const { handleComment } = require('./comment');
 
 const app = express();
 app.use(express.json());
@@ -27,10 +28,19 @@ app.post('/webhook', async (req, res) => {
     res.status(200).send('EVENT_RECEIVED');
 
     for (const entry of body.entry) {
-      const events = entry.messaging || [];
-      for (const event of events) {
+      // Xử lý tin nhắn Messenger
+      const messagingEvents = entry.messaging || [];
+      for (const event of messagingEvents) {
         if (event.message || event.postback) {
-          await handleMessage(event).catch(err => console.error('handleMessage error:', err));
+          handleMessage(event).catch(err => console.error('handleMessage error:', err));
+        }
+      }
+
+      // Xử lý comment trên bài đăng/quảng cáo
+      const feedChanges = entry.changes || [];
+      for (const change of feedChanges) {
+        if (change.field === 'feed') {
+          handleComment(change.value).catch(err => console.error('handleComment error:', err));
         }
       }
     }
