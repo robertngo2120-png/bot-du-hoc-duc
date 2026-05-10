@@ -104,6 +104,8 @@ NGUYÊN TẮC XỬ LÝ PHẢN ĐỐI:
 - Trả lời ngắn gọn, đủ để trấn an — không giải thích dài dòng
 - Kết thúc bằng đề nghị kết nối chuyên viên một cách tự nhiên
 - KHÔNG hứa hẹn những điều không chắc chắn
+- KHÔNG nhắc lại số điện thoại của khách trong tin nhắn
+- KHÔNG hứa thời gian cụ thể (không dùng "ngay bây giờ", "hôm nay", "trong X phút")
 
 == GIỚI HẠN THÔNG TIN ==
 Chỉ nói những gì có trong tài liệu. Nếu vượt phạm vi → "Câu hỏi này cần chuyên viên tư vấn trực tiếp mới chính xác ạ" rồi đề nghị để lại SĐT. KHÔNG tự bịa, KHÔNG đoán mò.
@@ -444,8 +446,19 @@ async function processMessage(event) {
       session.step = 'chatting';
     }
 
-    // Sau khi có SĐT vẫn trả lời
+    // Sau khi có SĐT
     if (session.step === 'done') {
+      // Khách sửa SĐT → cập nhật lead
+      const correctedPhone = extractPhone(userText);
+      if (correctedPhone && correctedPhone !== session.phone) {
+        session.phone = correctedPhone;
+        const fbName = await getFbName(senderId);
+        session.timestamp = new Date().toLocaleString('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh' });
+        await saveLead({ ...session, fbName, fbId: senderId });
+        await notifyTelegram({ ...session, fbName, fbId: senderId, name: session.name || fbName });
+        await sendText(senderId, 'Dạ em đã cập nhật lại số điện thoại rồi ạ. Chuyên viên sẽ liên hệ với anh/chị sớm nhé!');
+        return;
+      }
       const reply = await chat(session, userText);
       if (reply) await sendText(senderId, reply);
       return;
@@ -482,7 +495,7 @@ async function processMessage(event) {
       await notifyTelegram(leadData);
 
       await sendText(senderId,
-        'Cảm ơn anh/chị đã tin tưởng ICOEuro. Em sẽ chuyển thông tin đến chuyên viên phòng tư vấn, anh/chị sẽ được liên hệ trong thời gian sớm nhất.\n\nAnh/chị có thêm câu hỏi nào cần giải đáp không ạ?'
+        'Cảm ơn anh/chị đã tin tưởng ICOEuro. Em đã chuyển thông tin đến phòng tư vấn rồi ạ. Chuyên viên sẽ chủ động liên hệ với anh/chị sớm nhất có thể.\n\nAnh/chị có thêm câu hỏi nào cần giải đáp không ạ?'
       );
       session.step = 'done';
     } else {
